@@ -3,13 +3,14 @@ import os
 
 # Classe Pessoa
 class Pessoa:
-    def __init__(self, nome, idade, email):
+    def __init__(self, nome, idade, email, contato):
         self.nome = nome
         self.idade = idade
         self.email = email
+        self.contato = contato
 
     def to_list(self):
-        return [self.nome, self.idade, self.email]
+        return [self.nome, self.idade, self.email, self.contato]
 
 # Classe CRUD
 class CadastroPessoas:
@@ -20,7 +21,7 @@ class CadastroPessoas:
         if not os.path.exists(self.ARQUIVO):
             with open(self.ARQUIVO, mode="w", newline="") as f:
                 escritor = csv.writer(f)
-                escritor.writerow(["Nome", "Idade", "Email"])
+                escritor.writerow(["Nome", "Idade", "Email", "Contato"])
 
     def adicionar(self, pessoa: Pessoa):
         with open(self.ARQUIVO, mode="a", newline="") as f:
@@ -36,7 +37,7 @@ class CadastroPessoas:
                     continue  # pula cabeçalho
                 print(linha)
 
-    def atualizar(self, email, novo_nome, nova_idade):
+    def atualizar(self, email, novo_nome, nova_idade, nova_contato):
         linhas = []
         atualizado = False
         with open(self.ARQUIVO, mode="r") as f:
@@ -45,6 +46,7 @@ class CadastroPessoas:
                 if linha and linha[2] == email:
                     linha[0] = novo_nome
                     linha[1] = nova_idade
+                    linha[3] = nova_contato
                     atualizado = True
                 linhas.append(linha)
         with open(self.ARQUIVO, mode="w", newline="") as f:
@@ -62,8 +64,10 @@ class CadastroPessoas:
             leitor = csv.reader(f)
             for linha in leitor:
                 if linha and linha[2] != email:
+                    print("log ", linha, linha[2], email)
                     linhas.append(linha)
                 else:
+                    print("log else ", linha, linha[2], email)
                     excluido = True
         with open(self.ARQUIVO, mode="w", newline="") as f:
             escritor = csv.writer(f)
@@ -72,8 +76,6 @@ class CadastroPessoas:
             print("🗑️ Pessoa excluída com sucesso!")
         else:
             print("⚠️ Pessoa não encontrada.")
-
-
 
 def menu():
     cadastro = CadastroPessoas()
@@ -92,7 +94,8 @@ def menu():
             nome = input("Nome: ")
             idade = input("Idade: ")
             email = input("Email: ")
-            pessoa = Pessoa(nome, idade, email)
+            contato = input("Contato: ")
+            pessoa = Pessoa(nome, idade, email, contato)
             cadastro.adicionar(pessoa)
 
         elif opcao == "2":
@@ -102,11 +105,16 @@ def menu():
             email = input("Digite o email da pessoa que deseja atualizar: ")
             novo_nome = input("Novo nome: ")
             nova_idade = input("Nova idade: ")
-            cadastro.atualizar(email, novo_nome, nova_idade)
+            nova_contato = input("Novo Contato: ")
+            cadastro.atualizar(email, novo_nome, nova_idade, nova_contato)
 
         elif opcao == "4":
             email = input("Digite o email da pessoa que deseja excluir: ")
-            cadastro.excluir(email)
+            confirmacao = input(" Deseja realmente excluir esta pessoa? (s/n): ").strip().lower()
+            if confirmacao == 's':
+                cadastro.excluir(email)
+            else:
+                print("Excluição de Pessoa Cancelada!!!")
 
         elif opcao == "5":
             print("👋 Saindo do sistema...")
